@@ -58,7 +58,7 @@ async def start_election(interaction: discord.Interaction, seats: int, title: st
 
 		return await interaction.response.send_message(
 			f"{user.mention} created a new election titled '{title}', with {seats} seat{'s' if seats != 1 else ''}. "
-			f"You can apply to run in this election with `/join {title}`!",
+			f"You can apply to run in this election with `/run {title}`!",
 		)
 
 # delete election command
@@ -83,6 +83,11 @@ async def delete_election(interaction: discord.Interaction, title: str):
 				except FileNotFoundError:
 					pass
 
+				# remove this election from views
+				with open(f"elections/views.json", "w") as file:
+					views.pop(f"{guild.id}_{channel.id}_{title}", None)
+					print(json.dumps(views), file=file)
+
 				return await interaction.response.send_message(
 					f"{user.mention} deleted election with title '{title}'.",
 				)
@@ -104,6 +109,9 @@ async def delete_election(interaction: discord.Interaction, title: str):
 	description = "Apply to run in the election named <title>.",
 )
 async def join_election(interaction: discord.Interaction, title: str):
+	return await join_election_function(interaction, title)
+
+async def join_election_function(interaction: discord.Interaction, title: str):
 	guild = interaction.guild
 	channel = interaction.channel
 	user = interaction.user
@@ -136,7 +144,7 @@ async def join_election(interaction: discord.Interaction, title: str):
 				return await interaction.response.send_message(
 					f"{user.mention} is now running in the '{title}' election! "
 					f"You can view all candidates with `/view {title}`. "
-					f"You can stop running in the election with `/leave {title}`.",
+					f"You can stop running in the election with `/withdraw {title}`.",
 				)
 
 	except FileNotFoundError:
@@ -151,6 +159,9 @@ async def join_election(interaction: discord.Interaction, title: str):
 	description = "Stop running in the election named <title>.",
 )
 async def leave_election(interaction: discord.Interaction, title: str):
+	return await leave_election_function(interaction, title)
+
+async def leave_election_function(interaction: discord.Interaction, title: str):
 	guild = interaction.guild
 	channel = interaction.channel
 	user = interaction.user
@@ -236,7 +247,7 @@ async def remove_from_election(interaction: discord.Interaction, title: str, mem
 				if member == user:
 					return await interaction.response.send_message(
 						f"Election with title '{title}' was created by a different user ({owner}). "
-						f"If you want to leave it, you can use `/leave {title}` instead.",
+						f"If you want to leave it, you can use `/withdraw {title}` instead.",
 						ephemeral = True,
 					)
 				else:
@@ -391,6 +402,9 @@ async def close_election(interaction: discord.Interaction, title: str):
 	description = "Submit a vote to the election named <title>.",
 )
 async def vote_in_election(interaction: discord.Interaction, title: str):
+	return await vote_in_election(interaction, title)
+
+async def vote_in_election_function(interaction: discord.Interaction, title: str):
 	guild = interaction.guild
 	channel = interaction.channel
 	user = interaction.user
@@ -485,6 +499,96 @@ async def evaluate_election(interaction: discord.Interaction, title: str):
 			f"The evaluation for election '{title}' failed with {assertion}.",
 		)
 
+# create persistent join button
+@discord.app_commands.command(
+	name = "run-button",
+	description = "Create a persistent run button for the election named <title>.",
+)
+async def join_election_persistent(interaction: discord.Interaction, title: str):
+	guild = interaction.guild
+	channel = interaction.channel
+	user = interaction.user
+
+	try:
+		with open(f"elections/{guild.id}_{channel.id}_{title}.json", "r") as file:
+			data = json.loads(file.read())
+			owner = data["user"]
+
+			if owner == user.mention:
+				election_id = f"{guild.id}_{channel.id}_{title}"
+				view_id = "run"
+				view = persistent_view(election_id, view_id, title)
+				
+				# add this view to views if not added yet
+				with open(f"elections/views.json", "w") as file:
+					election = views.get(election_id, {"title": title, "views": []})
+					if view_id not in election["views"]:
+						election["views"].append(view_id)
+					views[election_id] = election
+
+					print(json.dumps(views), file=file)
+
+				return await interaction.response.send_message(
+					f"Press this button to run in the election with title '{title}'!",
+					view = view,
+				)
+			else:
+				return await interaction.response.send_message(
+					f"Election with title '{title}' was created by a different user. "
+					f"Ask its owner ({owner}) to create a persistent run button for it.",
+					ephemeral = True,
+				)
+	except FileNotFoundError:
+		return await interaction.response.send_message(
+			f"An election with title '{title}' does not exist in this channel.",
+			ephemeral = True
+		)
+
+# create persistent vote button
+@discord.app_commands.command(
+	name = "vote-button",
+	description = "Create a persistent vote button for the election named <title>.",
+)
+async def vote_in_election_persistent(interaction: discord.Interaction, title: str):
+	guild = interaction.guild
+	channel = interaction.channel
+	user = interaction.user
+
+	try:
+		with open(f"elections/{guild.id}_{channel.id}_{title}.json", "r") as file:
+			data = json.loads(file.read())
+			owner = data["user"]
+
+			if owner == user.mention:
+				election_id = f"{guild.id}_{channel.id}_{title}"
+				view_id = "vote"
+				view = persistent_view(election_id, view_id, title)
+				
+				# add this view to views if not added yet
+				with open(f"elections/views.json", "w") as file:
+					election = views.get(election_id, {"title": title, "views": []})
+					if view_id not in election["views"]:
+						election["views"].append(view_id)
+					views[election_id] = election
+
+					print(json.dumps(views), file=file)
+
+				return await interaction.response.send_message(
+					f"Press this button to vote in the election with title '{title}'!",
+					view = view,
+				)
+			else:
+				return await interaction.response.send_message(
+					f"Election with title '{title}' was created by a different user. "
+					f"Ask its owner ({owner}) to create a persistent vote button for it.",
+					ephemeral = True,
+				)
+	except FileNotFoundError:
+		return await interaction.response.send_message(
+			f"An election with title '{title}' does not exist in this channel.",
+			ephemeral = True
+		)
+
 dont_care = "I do not care about the order of the rest of the ballot"
 async def cast_vote(interaction: discord.Interaction, election: SingleTransferableVote, save=lambda: None):
 	selection = discord.ui.Select()
@@ -542,12 +646,46 @@ async def cast_vote(interaction: discord.Interaction, election: SingleTransferab
 	# run first round with all candidates
 	await next_round(interaction)
 
+# define persistent views
+def persistent_view(election_id: str, view_id: str, title: str):
+	class PersistentView(discord.ui.View):
+		def __init__(self):
+			super().__init__(timeout = None)
+
+		if view_id == "run":
+			@discord.ui.button(label="Run in this election", custom_id=f"{election_id}:run")
+			async def run(self, interaction: discord.Interaction, button: discord.ui.Button):
+				return await join_election_function(interaction, title)
+			
+			@discord.ui.button(label="Withdraw from this election", custom_id=f"{election_id}:withdraw")
+			async def withdraw(self, interaction: discord.Interaction, button: discord.ui.Button):
+				return await leave_election_function(interaction, title)
+		
+		elif view_id == "vote":
+			@discord.ui.button(label="Vote in this election", custom_id=f"{election_id}:vote")
+			async def vote(self, interaction: discord.Interaction, button: discord.ui.Button):
+				return await vote_in_election_function(interaction, title)
+		
+		elif view_id == "awawa":
+			@discord.ui.button(label="awawa", custom_id=f"{election_id}:awawa")
+			async def awawa(self, interaction: discord.Interaction, button: discord.ui.Button):
+				return await interaction.response.send_message("awawa", ephemeral=True)
+		
+	return PersistentView()
+
+# get views list from views.json
+with open("elections/views.json", "r") as file:
+	views = json.loads(file.read())
+
 # log in and update commands
 @client.event
 async def on_ready():
 	print(f'Logged in as {client.user}')
 
-	# new_file()
+	# load views
+	for election_id in views:
+		for view_id in views[election_id]["views"]:
+			client.add_view(persistent_view(election_id, view_id, title = views[election_id]["title"]))
 
 	tree = discord.app_commands.CommandTree(client)
 	tree.add_command(start_election, guild=None)
@@ -560,6 +698,8 @@ async def on_ready():
 	tree.add_command(close_election, guild=None)
 	tree.add_command(vote_in_election, guild=None)
 	tree.add_command(evaluate_election, guild=None)
+	tree.add_command(join_election_persistent, guild=None)
+	tree.add_command(vote_in_election_persistent, guild=None)
 	await tree.sync(guild=None)
 
 with open("token", "r") as file:
