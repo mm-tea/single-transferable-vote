@@ -1,0 +1,8 @@
+# local
+__pycache__
+
+# secret bot token
+token
+
+# election data
+elections/
