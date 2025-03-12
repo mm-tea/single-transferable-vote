@@ -12,7 +12,7 @@ client = discord.Client(intents=intents)
 # new election command
 @discord.app_commands.command(
 	name = "start",
-	description = "Start a new election with <seats> elected positions named <title> in this server.",
+	description = "Start a new election with <seats> elected positions named <title> in this channel.",
 )
 async def start_election(interaction: discord.Interaction, seats: int, title: str):
 	if seats < 1:
@@ -41,13 +41,13 @@ async def start_election(interaction: discord.Interaction, seats: int, title: st
 
 			if owner == user.mention:
 				return await interaction.response.send_message(
-					f"Election with title '{title}' already exists in this server. "
+					f"Election with title '{title}' already exists in this channel. "
 					f"Create an election with a different title or delete it with `/delete {title}`",
 					ephemeral = True,
 				)
 			else:
 				return await interaction.response.send_message(
-					f"Election with title '{title}' already exists in this server. "
+					f"Election with title '{title}' already exists in this channel. "
 					f"Create an election with a different title or ask its owner ({owner}) to delete it.",
 					ephemeral = True,
 				)
@@ -94,7 +94,7 @@ async def delete_election(interaction: discord.Interaction, title: str):
 				)
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 
@@ -141,7 +141,7 @@ async def join_election(interaction: discord.Interaction, title: str):
 
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 
@@ -187,7 +187,7 @@ async def leave_election(interaction: discord.Interaction, title: str):
 
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 
@@ -247,7 +247,7 @@ async def remove_from_election(interaction: discord.Interaction, title: str, mem
 					)
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 
@@ -276,7 +276,7 @@ async def view_election(interaction: discord.Interaction, title: str):
 
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 
@@ -334,7 +334,7 @@ async def open_election(interaction: discord.Interaction, title: str):
 				)
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 
@@ -381,7 +381,7 @@ async def close_election(interaction: discord.Interaction, title: str):
 				)
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 
@@ -422,7 +422,7 @@ async def vote_in_election(interaction: discord.Interaction, title: str):
 
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 
@@ -477,7 +477,7 @@ async def evaluate_election(interaction: discord.Interaction, title: str):
 				)
 	except FileNotFoundError:
 		return await interaction.response.send_message(
-			f"An election with title '{title}' does not exist in this server.",
+			f"An election with title '{title}' does not exist in this channel.",
 			ephemeral = True
 		)
 	except AssertionError as assertion:
