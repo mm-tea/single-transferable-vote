@@ -1,5 +1,4 @@
-# import pickle
-import json
+import pickle
 
 class SingleTransferableVote:
 	def __init__(self, seats: int, candidates: list[str]):
@@ -49,15 +48,14 @@ class SingleTransferableVote:
 			"seats": self.seats,
 			"votes": {key: self.votes[key].ranking for key in self.votes},
 		}
-		with open(filename, "w+") as file:
-			# pickle.dump(data, file)
-			print(json.dumps(data), file=file)
+		with open(filename, "wb+") as file:
+			pickle.dump(data, file)
+			# print(json.dumps(data), file=file)
 
 	@classmethod
 	def load(cls, filename):
-		with open(filename, "r") as file:
-			# data = pickle.load(file)
-			data = json.loads(file.read())
+		with open(filename, "rb") as file:
+			data = pickle.load(file)
 		obj = SingleTransferableVote(data["seats"], data["candidates"])
 		obj.votes = {key: obj.Vote.from_list(data["votes"][key], key) for key in data["votes"]}
 		return obj
