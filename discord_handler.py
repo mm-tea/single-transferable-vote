@@ -100,7 +100,7 @@ async def delete_election(interaction: discord.Interaction, title: str):
 
 # join election command
 @discord.app_commands.command(
-	name = "join",
+	name = "run",
 	description = "Apply to run in the election named <title>.",
 )
 async def join_election(interaction: discord.Interaction, title: str):
@@ -147,7 +147,7 @@ async def join_election(interaction: discord.Interaction, title: str):
 
 # leave election command
 @discord.app_commands.command(
-	name = "leave",
+	name = "withdraw",
 	description = "Stop running in the election named <title>.",
 )
 async def leave_election(interaction: discord.Interaction, title: str):
@@ -181,7 +181,7 @@ async def leave_election(interaction: discord.Interaction, title: str):
 					print(json.dumps(data), file=file)
 
 				return await interaction.response.send_message(
-					f"{user.mention} is no longer running in the '{title}' election! "
+					f"{user.mention} has withdrawn from the '{title}' election! "
 					f"You can view all candidates with `/view {title}`.",
 				)
 
@@ -194,7 +194,7 @@ async def leave_election(interaction: discord.Interaction, title: str):
 # remove member from election command
 @discord.app_commands.command(
 	name = "remove",
-	description = "Remove someone from the election named <title>. You can only remove members from your own elections.",
+	description = "Remove <member> from the election named <title>. You can only do this in your own elections.",
 )
 async def remove_from_election(interaction: discord.Interaction, title: str, member: discord.Member):
 	guild = interaction.guild
