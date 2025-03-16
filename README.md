@@ -11,6 +11,6 @@ Run simple STV elections in your server.
   Also implements a simple interface for sequentially creating votes.
 - [test.py](https://github.com/mm-tea/single-transferable-vote/blob/main/test.py):
   Contains stress tests for the election.py file, to confirm it is working as intended.
-- [token](https://github.com/mm-tea/single-transferable-vote/blob/main/token):
+- token.txt:
   Place your discord bot authorization token in this file.
   This should be unique to each bot, replace yours in this file.
