@@ -72,6 +72,8 @@ class SingleTransferableVote:
 		required_votes = total_votes/(self.seats + 1)
 		print(required_votes)
 
+		times_recalculated = 0
+
 		# repeat until seats are filled or everyone except seat amount is eliminated
 		while (len(elected) < self.seats) and (len(elected) + len(candidates) > self.seats):
 			candidate_votes = {candidate: 0 for candidate in candidates}
@@ -95,11 +97,15 @@ class SingleTransferableVote:
 			
 			# if keep_values changed significantly, start over and continue until they don't
 			if largest_change > 0.0001:
-				print(".", end="")
+				times_recalculated += 1
 				continue
 			print()
+			if times_recalculated != 0:
+				print(f"recalculated keep_values {times_recalculated} times")
+				times_recalculated = 0
 
-			print(f"{candidate_votes = }, {keep_values = }")
+			print(f"{keep_values = }")
+			print(f"{candidate_votes = }")
 			
 			new_elected = False
 			# elect candidates with enough votes
@@ -124,6 +130,8 @@ class SingleTransferableVote:
 					least_candidates.append(candidate)
 
 			assert len(least_candidates) == 1, f"There is a tie between the following candidates: {least_candidates}"
+
+			print(f"discarding {least_candidates[0]}")
 
 			candidates.discard(least_candidates[0])
 			keep_values[least_candidates[0]] = 0
